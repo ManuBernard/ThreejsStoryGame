@@ -20,6 +20,9 @@ export default class level1 extends level {
       level2: { x: -3, y: 1, z: 0 },
     })
 
+    // Add doors
+    this.addDoor({ x: -5.5, y: 1, z: 0 }, { x: 1, y: 2, z: 1 }, "level2")
+
     // Add Ground
     const ground = new THREE.Mesh(
       new THREE.BoxBufferGeometry(20, 20, 20),
@@ -41,9 +44,6 @@ export default class level1 extends level {
 
     house.position.y = 0.5
     house.position.x = this.game.scene.add(house)
-
-    // Add doors
-    this.addDoor({ x: -5.5, y: 1, z: 0 }, { x: 1, y: 2, z: 1 }, "level2")
 
     // Position cameras
     this.game.camera.position.set(0, 8, 10)

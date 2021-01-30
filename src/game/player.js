@@ -33,6 +33,7 @@ export default class Caracter {
       new THREE.BoxBufferGeometry(0.3, 0.3, 0.3),
       new THREE.MeshStandardMaterial({ color: "red", wireframe: true })
     )
+    this.direction.userData.preserve = true
   }
 
   _createBody() {
@@ -41,10 +42,14 @@ export default class Caracter {
       new THREE.MeshMatcapMaterial({ matcap: shirtTexture })
     )
 
+    body.userData.preserve = true
+
     const head = new THREE.Mesh(
       new THREE.BoxBufferGeometry(0.5, 0.5, 0.5),
       new THREE.MeshMatcapMaterial({ matcap: skinTexture })
     )
+
+    head.userData.preserve = true
 
     head.position.z = 0.15
 
@@ -53,10 +58,14 @@ export default class Caracter {
       new THREE.MeshMatcapMaterial({ matcap: hairTexture })
     )
 
+    hair.userData.preserve = true
+
     const eyebrow = new THREE.Mesh(
       new THREE.BoxBufferGeometry(0.3, 0.1, 0.1),
       new THREE.MeshStandardMaterial({ color: "black" })
     )
+
+    eyebrow.userData.preserve = true
 
     head.add(hair)
     head.add(eyebrow)

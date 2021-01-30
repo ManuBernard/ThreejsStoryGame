@@ -117,6 +117,7 @@ export default class Game {
       this.player.move()
 
       this.camera.lookAt(this.player.direction.position)
+
       this.player.direction.lookAt(
         this.camera.position.x,
         this.player.direction.position.y,
@@ -136,6 +137,7 @@ export default class Game {
    * Load level
    */
   loadLevel(to, from) {
+    console.log("to : " + to + "  & from : " + from)
     import("../levels/" + to).then(
       function (module) {
         const level = module.default

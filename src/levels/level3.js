@@ -5,7 +5,7 @@ import groundTextureSource from "../textures/3.png"
 const textureLoader = new THREE.TextureLoader()
 const groundTexture = textureLoader.load(groundTextureSource)
 
-export default class level1 extends level {
+export default class level3 extends level {
   constructor(game, from) {
     super(game, from)
   }
@@ -16,8 +16,11 @@ export default class level1 extends level {
 
     // Set possible starting points
     this.setStartPoint({
-      level2: { x: 3, y: 1, z: 0 },
+      level2b: { x: 3, y: 1, z: 0 },
     })
+
+    // Add doors
+    this.addDoor({ x: 4, y: 1, z: 0 }, { x: 1, y: 2, z: 1 }, "level2b")
 
     // Add Ground
     const ground = new THREE.Mesh(
@@ -26,9 +29,6 @@ export default class level1 extends level {
     )
     ground.rotation.x = -Math.PI / 2
     this.game.scene.add(ground)
-
-    // Add doors
-    this.addDoor({ x: 4, y: 1, z: 0 }, { x: 1, y: 2, z: 1 }, "level2")
 
     // Position cameras
     this.game.camera.position.set(0, 3, 11)

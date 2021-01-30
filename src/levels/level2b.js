@@ -1,6 +1,6 @@
 import * as THREE from "three"
 import level from "../game/level"
-import groundTextureSource from "../textures/2.png"
+import groundTextureSource from "../textures/5.png"
 
 const textureLoader = new THREE.TextureLoader()
 const groundTexture = textureLoader.load(groundTextureSource)
@@ -12,17 +12,17 @@ export default class level2 extends level {
 
   _build() {
     // Define level name
-    this.name = "level2"
+    this.name = "level2b"
 
     // Set possible starting points
     this.setStartPoint({
-      level2b: { x: -3, y: 1, z: 0 },
-      level1: { x: 3, y: 1, z: 0 },
+      level3: { x: -3, y: 1, z: 0 },
+      level2: { x: 3, y: 1, z: 0 },
     })
 
     // Add doors
-    this.addDoor({ x: -4, y: 1, z: 0 }, { x: 1, y: 2, z: 1 }, "level2b")
-    this.addDoor({ x: 4, y: 1, z: 0 }, { x: 1, y: 2, z: 1 }, "level1")
+    this.addDoor({ x: -4, y: 1, z: 0 }, { x: 1, y: 2, z: 1 }, "level3")
+    this.addDoor({ x: 4, y: 1, z: 0 }, { x: 1, y: 2, z: 1 }, "level2")
 
     // Add Ground
     const ground = new THREE.Mesh(
