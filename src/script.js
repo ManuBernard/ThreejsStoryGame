@@ -6,5 +6,7 @@ const game = new Game()
 game.start()
 
 window.setTimeout(function () {
-  game.loadLevel("level1", "init")
+  game.loadStage("fabrik", () => {
+    game.startStage("fabrik", "init")
+  })
 }, 100)
