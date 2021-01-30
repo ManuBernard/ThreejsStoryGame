@@ -33,7 +33,7 @@ export default class level2 extends level {
     this.addDoor({ x: 4, y: 1, z: 0 }, { x: 1, y: 2, z: 1 }, "level1")
 
     // Position cameras
-    this.game.camera.position.set(-4, 26, 0)
+    this.game.camera.position.set(0, 26, 8)
     this.game.camera.rotation.set(4.81, 0, 0)
   }
 }

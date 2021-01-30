@@ -69,8 +69,7 @@ export default class Game {
 
   _initPlayer() {
     this.player = new Player()
-    this.scene.add(this.player.body)
-    this.player.body.position.x = 1
+    this.player.addTo(this.scene)
   }
 
   _initDebug() {
@@ -117,6 +116,12 @@ export default class Game {
 
       this.player.move()
 
+      this.camera.lookAt(this.player.direction.position)
+      this.player.direction.lookAt(
+        this.camera.position.x,
+        this.player.direction.position.y,
+        this.camera.position.z
+      )
       // Rerender the scene
       this.renderer.render(this.scene, this.camera)
 
