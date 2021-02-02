@@ -1,3 +1,5 @@
+/** @module Player */
+
 import * as THREE from "three"
 
 import skinTextureSource from "../textures/1.png"
@@ -12,7 +14,11 @@ const skinTexture = textureLoader.load(skinTextureSource)
 const hairTexture = textureLoader.load(hairTextureSource)
 const shirtTexture = textureLoader.load(shirtTextureSource)
 
-export default class Caracter {
+/** Class representing the player. */
+export default class Player {
+  /**
+   * Create the player.
+   */
   constructor() {
     this.speed = 0.1
 
@@ -24,69 +30,17 @@ export default class Caracter {
     this.controller = new Controller()
   }
 
+  /**
+   * Add the player to the scene
+   * @param {Object} scene The game scene where to attach the player
+   */
   addTo(scene) {
     scene.add(this.direction)
   }
 
-  _initDirection() {
-    this.direction = new THREE.Mesh(
-      new THREE.BoxBufferGeometry(0.3, 0.3, 0.3),
-      new THREE.MeshStandardMaterial({ color: "red", wireframe: true })
-    )
-
-    this.direction.name = "Player"
-    this.direction.userData.preserve = true
-  }
-
-  _createBody() {
-    const body = new THREE.Mesh(
-      new THREE.BoxBufferGeometry(0.75, 1, 0.25),
-      new THREE.MeshMatcapMaterial({ matcap: shirtTexture })
-    )
-
-    body.userData.preserve = true
-
-    const head = new THREE.Mesh(
-      new THREE.BoxBufferGeometry(0.5, 0.5, 0.5),
-      new THREE.MeshMatcapMaterial({ matcap: skinTexture })
-    )
-
-    head.userData.preserve = true
-
-    head.position.z = 0.15
-
-    const hair = new THREE.Mesh(
-      new THREE.BoxBufferGeometry(0.6, 0.6, 0.6),
-      new THREE.MeshMatcapMaterial({ matcap: hairTexture })
-    )
-
-    hair.userData.preserve = true
-
-    const eyebrow = new THREE.Mesh(
-      new THREE.BoxBufferGeometry(0.3, 0.1, 0.1),
-      new THREE.MeshStandardMaterial({ color: "black" })
-    )
-
-    eyebrow.userData.preserve = true
-
-    head.add(hair)
-    head.add(eyebrow)
-    hair.position.z = -0.1
-    hair.position.y = 0.1
-
-    eyebrow.position.z = 0.26
-
-    head.position.y = 0.75
-    body.add(head)
-
-    this.body = body
-
-    this.body.geometry.computeBoundingBox()
-    this.body.userData.preserve = true
-  }
-
   /**
-   * Move
+   * Move the player in the stage
+   * This is call on every animation frame
    */
   move() {
     const mz = this.controller.movingZ[0]
@@ -120,5 +74,82 @@ export default class Caracter {
     } else if (mz == "down" && mx == "left") {
       this.body.rotation.y = Math.PI * 1.75
     }
+  }
+
+  /**
+   *
+   *
+   *  Private
+   *
+   *
+   */
+
+  /**
+   * Initialize player direction
+   * @Private
+   */
+  _initDirection() {
+    this.direction = new THREE.Mesh(
+      new THREE.BoxBufferGeometry(0.3, 0.3, 0.3),
+      new THREE.MeshStandardMaterial({ color: "red", wireframe: true })
+    )
+
+    this.direction.name = "Player"
+    this.direction.userData.preserve = true
+  }
+
+  /**
+   * Initialize player body
+   * @Private
+   */
+  _createBody() {
+    const body = new THREE.Mesh(
+      new THREE.BoxBufferGeometry(0.75, 1, 0.25),
+      new THREE.MeshMatcapMaterial({ matcap: shirtTexture })
+    )
+
+    body.name = "Body"
+    body.userData.preserve = true
+
+    const head = new THREE.Mesh(
+      new THREE.BoxBufferGeometry(0.5, 0.5, 0.5),
+      new THREE.MeshMatcapMaterial({ matcap: skinTexture })
+    )
+
+    head.name = "Head"
+    head.userData.preserve = true
+
+    head.position.z = 0.15
+
+    const hair = new THREE.Mesh(
+      new THREE.BoxBufferGeometry(0.6, 0.6, 0.6),
+      new THREE.MeshMatcapMaterial({ matcap: hairTexture })
+    )
+
+    hair.name = "Hair"
+    hair.userData.preserve = true
+
+    const eyebrow = new THREE.Mesh(
+      new THREE.BoxBufferGeometry(0.3, 0.1, 0.1),
+      new THREE.MeshStandardMaterial({ color: "black" })
+    )
+
+    eyebrow.name = "Eyebrow"
+    eyebrow.userData.preserve = true
+
+    head.add(hair)
+    head.add(eyebrow)
+    hair.position.z = -0.1
+    hair.position.y = 0.1
+
+    eyebrow.position.z = 0.26
+
+    head.position.y = 0.75
+    body.add(head)
+
+    this.body = body
+
+    this.body.geometry.computeBoundingBox()
+    this.body.userData.preserve = true
   }
 }

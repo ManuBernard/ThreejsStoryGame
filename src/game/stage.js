@@ -1,18 +1,26 @@
+/** @module Stage */
+
 import * as THREE from "three"
 import Door from "./door"
 
 import { detectCollisionCubes } from "./helper/collisions"
 
+/** Class representing a stage, is responsible for the landscape, doodads, doors, npc...  */
 export default class stage {
-  constructor(stage, game, from) {
-    console.log(stage.name)
+  /**
+   * Create a stage.
+   * @param {object} stageData The stage data
+   * @param {object} game The main game occurence
+   * @param {string} from The name of the stage where the player is coming from
+   */
+  constructor(stageData, game, from) {
     this.game = game
     this.from = from
 
-    this.name = stage.name
-    this.meshes = stage.meshes
-    this.doors = stage.doors
-    this.camera = stage.camera
+    this.name = stageData.name
+    this.meshes = stageData.meshes
+    this.doors = stageData.doors
+    this.camera = stageData.camera
 
     this.init()
 
@@ -50,17 +58,12 @@ export default class stage {
    * Load all doors (doors are teleports to other stages)
    */
   loadDoors() {
-    // window.setTimeout(
-    // function () {
     for (let key in this.doors) {
       if (this.doors[key].position) {
         const door = new Door(key, this.doors[key])
         this.group.add(door.mesh)
       }
     }
-    //   }.bind(this),
-    //   1000
-    // )
   }
 
   /**
@@ -92,8 +95,25 @@ export default class stage {
     )
   }
 
+  /**
+   * Watch, is called on every frame
+   */
   watch() {
     this._checkDoorCollision()
+  }
+
+  /**
+   * Clean the stage (remove objects + dispose materials and geometries)
+   */
+  clean() {
+    this.game.scene.traverse(function (obj) {
+      if (!obj.userData.preserve) {
+        if (obj.material) obj.material.dispose()
+        if (obj.geometry) obj.geometry.dispose()
+      }
+    })
+
+    this.game.scene.remove(this.group)
   }
 
   /**
@@ -104,32 +124,9 @@ export default class stage {
    *
    */
 
-  _clean() {
-    // for (const material in this.materials) {
-    //   this.materials[material].dispose()
-    // }
-
-    // this.materials = {}
-
-    // for (const geometry in this.geometries) {
-    //   this.geometries[geometry].dispose()
-    // }
-
-    // this.geometries = {}
-
-    this.game.scene.traverse(function (obj) {
-      if (!obj.userData.preserve) {
-        console.log(obj.material)
-        if (obj.material) obj.material.dispose()
-        if (obj.geometry) obj.geometry.dispose()
-      }
-    })
-
-    this.game.scene.remove(this.group)
-  }
-
   /**
    * Check for contact with doors
+   * @private
    */
   _checkDoorCollision() {
     this.game.scene.traverse(
@@ -138,7 +135,7 @@ export default class stage {
           const col = detectCollisionCubes(obj, this.game.player.body)
 
           if (col) {
-            this.game.startStage(obj.userData.doorTo, this.name)
+            this.game.loadStage(obj.userData.doorTo, this.name)
           }
         }
       }.bind(this)
