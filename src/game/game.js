@@ -2,6 +2,7 @@ import * as THREE from "three"
 import { gui } from "./helper/debug"
 
 import Player from "./player.js"
+import Stage from "./stage.js"
 
 const sizes = {
   width: window.innerWidth,
@@ -10,8 +11,8 @@ const sizes = {
 
 export default class Game {
   constructor() {
-    this.currentLevel = null
-    this.loadedLevels = []
+    this.currentStage = null
+    this.loadedStages = []
 
     this._initScene()
     this._initCanvas()
@@ -21,9 +22,6 @@ export default class Game {
     this._initPlayer()
 
     this.running = false
-
-    // Debug
-    this._initDebug()
   }
 
   // Public
@@ -38,7 +36,7 @@ export default class Game {
     const tick = function () {
       const elapsedTime = clock.getElapsedTime()
 
-      if (this.running) this.currentLevel.watch()
+      if (this.currentStage) this.currentStage.watch()
 
       this.player.move()
 
@@ -60,14 +58,16 @@ export default class Game {
   }
 
   /**
-   * Load level
+   * Load Stage
    */
-  loadLevel(to, callback) {
-    import("../levels/" + to).then(
-      function (module) {
-        this.loadedLevels[to] = module.default
+  loadStage(to, callback) {
+    console.log("Loading" + to)
 
-        console.log(this.loadedLevels[to])
+    import(/* webpackChunkName:  "[request]" */ `../stages/${to}`).then(
+      function (module) {
+        console.log("Loaded " + to)
+        this.loadedStages[to] = module.stage
+
         if (callback) {
           callback()
         }
@@ -76,24 +76,37 @@ export default class Game {
   }
 
   /**
-   * Load level
+   * Start Stage
    */
-  startLevel(to, from) {
-    this.running = false
-    if (this.currentLevel) {
-      this.currentLevel._clean()
+  startStage(to, from) {
+    // Clean the current Stage
+    if (this.currentStage) {
+      this.currentStage._clean()
     }
 
-    this.currentLevel = new this.loadedLevels[to](this, from)
+    // Launch the new Stage
     window.requestAnimationFrame(
       function () {
-        this.running = true
+        this.currentStage = new Stage(this.loadedStages[to], this, from)
+        this.preloadStages()
       }.bind(this)
     )
   }
 
   /**
-   * Add camera
+   * Preload stages
+   */
+
+  preloadStages() {
+    for (let key in this.currentStage.doors) {
+      if (this.currentStage.doors[key].position) {
+        this.loadStage(key)
+      }
+    }
+  }
+
+  /**
+   * Move camera
    */
   moveCamera(position, rotation) {
     this.camera.position.set(position.x, position.y, position.z)
@@ -149,34 +162,6 @@ export default class Game {
   _initPlayer() {
     this.player = new Player()
     this.player.addTo(this.scene)
-  }
-
-  _initDebug() {
-    this.debug = gui
-
-    // Camera
-    const camera = this.debug.addFolder("Camera")
-    camera.add(this.camera.position, "x").name("PosX")
-    camera.add(this.camera.position, "y").name("PosY")
-    camera.add(this.camera.position, "z").name("Posz")
-    camera
-      .add(this.camera.rotation, "x")
-      .name("RotX")
-      .min(-Math.PI * 2)
-      .max(Math.PI * 2)
-      .step(0.001)
-    camera
-      .add(this.camera.rotation, "y")
-      .name("RotY")
-      .min(-Math.PI * 2)
-      .max(Math.PI * 2)
-      .step(0.001)
-    camera
-      .add(this.camera.rotation, "z")
-      .name("RotZ")
-      .min(-Math.PI * 2)
-      .max(Math.PI * 2)
-      .step(0.001)
   }
 }
 
