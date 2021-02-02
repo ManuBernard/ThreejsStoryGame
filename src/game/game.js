@@ -10,7 +10,8 @@ const sizes = {
 
 export default class Game {
   constructor() {
-    this.currentLevel
+    this.currentLevel = null
+    this.loadedLevels = []
 
     this._initScene()
     this._initCanvas()
@@ -19,8 +20,89 @@ export default class Game {
     this._initHandleSize()
     this._initPlayer()
 
+    this.running = false
+
     // Debug
     this._initDebug()
+  }
+
+  // Public
+
+  /**
+   * Start game
+   */
+  start() {
+    // Init clock
+    const clock = new THREE.Clock()
+
+    const tick = function () {
+      const elapsedTime = clock.getElapsedTime()
+
+      if (this.running) this.currentLevel.watch()
+
+      this.player.move()
+
+      this.camera.lookAt(this.player.direction.position)
+
+      this.player.direction.lookAt(
+        this.camera.position.x,
+        this.player.direction.position.y,
+        this.camera.position.z
+      )
+      // Rerender the scene
+      this.renderer.render(this.scene, this.camera)
+
+      // Call tick again on the next frame
+      window.requestAnimationFrame(tick)
+    }.bind(this)
+
+    tick()
+  }
+
+  /**
+   * Load level
+   */
+  loadLevel(to, callback) {
+    console.log("Loading level:" + to)
+
+    import("../levels/" + to).then(
+      function (module) {
+        console.log("Success loading level: " + to)
+        this.loadedLevels[to] = module.default
+        if (callback) {
+          callback()
+        }
+      }.bind(this)
+    )
+  }
+
+  /**
+   * Load level
+   */
+  startLevel(to, from) {
+    this.running = false
+    if (this.currentLevel) {
+      this.currentLevel._clean()
+    }
+
+    console.log(this.loadedLevels)
+
+    this.currentLevel = new this.loadedLevels[to](this, from)
+    window.requestAnimationFrame(
+      function () {
+        this.running = true
+      }.bind(this)
+    )
+  }
+
+  /**
+   * Add camera
+   */
+  moveCamera(position, rotation) {
+    this.camera.position.set(position.x, position.y, position.z)
+    this.camera.rotation.set(rotation.x, rotation.y, rotation.z)
+
+    this.scene.add(this.camera)
   }
 
   _initCanvas() {
@@ -98,62 +180,6 @@ export default class Game {
       .min(-Math.PI * 2)
       .max(Math.PI * 2)
       .step(0.001)
-  }
-
-  // Public
-
-  /**
-   * Start game
-   */
-  start() {
-    // Init clock
-    const clock = new THREE.Clock()
-
-    const tick = function () {
-      const elapsedTime = clock.getElapsedTime()
-
-      if (this.currentLevel) this.currentLevel.watch()
-
-      this.player.move()
-
-      this.camera.lookAt(this.player.direction.position)
-
-      this.player.direction.lookAt(
-        this.camera.position.x,
-        this.player.direction.position.y,
-        this.camera.position.z
-      )
-      // Rerender the scene
-      this.renderer.render(this.scene, this.camera)
-
-      // Call tick again on the next frame
-      window.requestAnimationFrame(tick)
-    }.bind(this)
-
-    tick()
-  }
-
-  /**
-   * Load level
-   */
-  loadLevel(to, from) {
-    console.log("to : " + to + "  & from : " + from)
-    import("../levels/" + to).then(
-      function (module) {
-        const level = module.default
-        this.currentLevel = new level(this, from)
-      }.bind(this)
-    )
-  }
-
-  /**
-   * Add camera
-   */
-  moveCamera(position, rotation) {
-    this.camera.position.set(position.x, position.y, position.z)
-    this.camera.rotation.set(rotation.x, rotation.y, rotation.z)
-
-    this.scene.add(this.camera)
   }
 }
 

@@ -1,36 +1,52 @@
 import * as THREE from "three"
 import level from "../game/level"
-import groundTextureSource from "../textures/2.png"
 
-const textureLoader = new THREE.TextureLoader()
-const groundTexture = textureLoader.load(groundTextureSource)
+import groundTextureSource from "../textures/1.png"
 
-export default class level2 extends level {
+const name = "level2"
+
+const doors = [
+  // {
+  //   destination: "level2b",
+  //   position: { x: -4, y: 1, z: 0 },
+  //   size: { x: 1, y: 2, z: 1 },
+  //   rotation: 0,
+  //   spawn: { x: -3, y: 1, z: 0 },
+  // },
+  {
+    destination: "level1",
+    position: { x: 4, y: 1, z: 0 },
+    size: { x: 1, y: 2, z: 1 },
+    rotation: 0,
+    spawn: { x: 3, y: 1, z: 0 },
+  },
+]
+
+export default class level1 extends level {
   constructor(game, from) {
     super(game, from)
+    this.name = name
   }
 
-  _build() {
-    // Define level name
-    this.name = "level2"
-
-    // Set possible starting points
-    this.setStartPoint({
-      level2b: { x: -3, y: 1, z: 0 },
-      level1: { x: 3, y: 1, z: 0 },
-    })
+  build() {
+    // Load textures
+    this.loadTexture("ground", groundTextureSource)
 
     // Add doors
-    this.addDoor({ x: -4, y: 1, z: 0 }, { x: 1, y: 2, z: 1 }, "level2b")
-    this.addDoor({ x: 4, y: 1, z: 0 }, { x: 1, y: 2, z: 1 }, "level1")
+    this.doors = doors
 
     // Add Ground
     const ground = new THREE.Mesh(
       new THREE.PlaneBufferGeometry(12, 12),
-      new THREE.MeshMatcapMaterial({ matcap: groundTexture })
+      new THREE.MeshMatcapMaterial({ matcap: this.textures.ground })
     )
     ground.rotation.x = -Math.PI / 2
-    this.game.scene.add(ground)
+
+    window.requestAnimationFrame(
+      function () {
+        this.game.scene.add(ground)
+      }.bind(this)
+    )
 
     // Position cameras
     this.game.camera.position.set(0, 26, 8)

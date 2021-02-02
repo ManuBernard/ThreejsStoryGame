@@ -10,7 +10,7 @@ export default class level2 extends level {
     super(game, from)
   }
 
-  _build() {
+  build() {
     // Define level name
     this.name = "level2b"
 
