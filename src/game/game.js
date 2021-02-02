@@ -63,12 +63,11 @@ export default class Game {
    * Load level
    */
   loadLevel(to, callback) {
-    console.log("Loading level:" + to)
-
     import("../levels/" + to).then(
       function (module) {
-        console.log("Success loading level: " + to)
         this.loadedLevels[to] = module.default
+
+        console.log(this.loadedLevels[to])
         if (callback) {
           callback()
         }
@@ -84,8 +83,6 @@ export default class Game {
     if (this.currentLevel) {
       this.currentLevel._clean()
     }
-
-    console.log(this.loadedLevels)
 
     this.currentLevel = new this.loadedLevels[to](this, from)
     window.requestAnimationFrame(

@@ -23,13 +23,11 @@ const doors = [
 
 export default class level1 extends level {
   constructor(game, from) {
-    console.log("construct" + "level1")
     super(game, from)
     this.name = name
   }
 
   build() {
-    console.log("build level")
     // Load textures
     this.loadTexture("ground", groundTextureSource)
 

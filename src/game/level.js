@@ -6,8 +6,6 @@ import { detectCollisionCubes } from "./helper/collisions"
 
 export default class level {
   constructor(game, from) {
-    console.log("from = " + from)
-
     this.game = game
     this.from = from
     this.isReady = true
@@ -29,8 +27,6 @@ export default class level {
     this.game.scene.add(this.group)
 
     console.log(this.doors)
-
-    console.log(this.game.scene.children)
   }
 
   /**
@@ -51,7 +47,6 @@ export default class level {
   loadPlayer() {
     this.doors.forEach((door) => {
       if (door.destination == this.from) {
-        console.log(this.from)
         this.game.player.direction.position.set(
           door.spawn.x,
           door.spawn.y,
@@ -92,7 +87,7 @@ export default class level {
           door.position.z
         )
 
-        this.doors.push(door)
+        //this.doors.push(door)
         this.group.add(door.mesh)
 
         // Preload level
@@ -131,15 +126,6 @@ export default class level {
     this.geometries = {}
 
     this.game.scene.remove(this.group)
-
-    // for (let i = scene.children.length - 1; i >= 0; i--) {
-    //   const obj = scene.children[i]
-
-    //   if (!obj.userData.preserve) {
-    //     console.log("remove ob", obj)
-    //     this.game.scene.remove(obj)
-    //   }
-    // }
   }
 
   /**
@@ -154,6 +140,7 @@ export default class level {
 
             if (col) {
               this.isReady = false
+
               this.game.startLevel(
                 obj.userData.doorTo,
                 this.game.currentLevel.name
