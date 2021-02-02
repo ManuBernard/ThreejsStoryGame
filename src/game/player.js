@@ -33,6 +33,8 @@ export default class Caracter {
       new THREE.BoxBufferGeometry(0.3, 0.3, 0.3),
       new THREE.MeshStandardMaterial({ color: "red", wireframe: true })
     )
+
+    this.direction.name = "Player"
     this.direction.userData.preserve = true
   }
 

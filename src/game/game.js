@@ -2,6 +2,7 @@ import * as THREE from "three"
 import { gui } from "./helper/debug"
 
 import Player from "./player.js"
+import Stage from "./stage.js"
 
 const sizes = {
   width: window.innerWidth,
@@ -10,7 +11,8 @@ const sizes = {
 
 export default class Game {
   constructor() {
-    this.currentLevel
+    this.currentStage = null
+    this.loadedStages = []
 
     this._initScene()
     this._initCanvas()
@@ -19,8 +21,98 @@ export default class Game {
     this._initHandleSize()
     this._initPlayer()
 
-    // Debug
-    this._initDebug()
+    this.running = false
+  }
+
+  // Public
+
+  /**
+   * Start game
+   */
+  start() {
+    // Init clock
+    const clock = new THREE.Clock()
+
+    const tick = function () {
+      const elapsedTime = clock.getElapsedTime()
+
+      if (this.currentStage) this.currentStage.watch()
+
+      this.player.move()
+
+      this.camera.lookAt(this.player.direction.position)
+
+      this.player.direction.lookAt(
+        this.camera.position.x,
+        this.player.direction.position.y,
+        this.camera.position.z
+      )
+      // Rerender the scene
+      this.renderer.render(this.scene, this.camera)
+
+      // Call tick again on the next frame
+      window.requestAnimationFrame(tick)
+    }.bind(this)
+
+    tick()
+  }
+
+  /**
+   * Load Stage
+   */
+  loadStage(to, callback) {
+    console.log("Loading" + to)
+
+    import(/* webpackChunkName:  "[request]" */ `../stages/${to}`).then(
+      function (module) {
+        console.log("Loaded " + to)
+        this.loadedStages[to] = module.stage
+
+        if (callback) {
+          callback()
+        }
+      }.bind(this)
+    )
+  }
+
+  /**
+   * Start Stage
+   */
+  startStage(to, from) {
+    // Clean the current Stage
+    if (this.currentStage) {
+      this.currentStage._clean()
+    }
+
+    // Launch the new Stage
+    window.requestAnimationFrame(
+      function () {
+        this.currentStage = new Stage(this.loadedStages[to], this, from)
+        this.preloadStages()
+      }.bind(this)
+    )
+  }
+
+  /**
+   * Preload stages
+   */
+
+  preloadStages() {
+    for (let key in this.currentStage.doors) {
+      if (this.currentStage.doors[key].position) {
+        this.loadStage(key)
+      }
+    }
+  }
+
+  /**
+   * Move camera
+   */
+  moveCamera(position, rotation) {
+    this.camera.position.set(position.x, position.y, position.z)
+    this.camera.rotation.set(rotation.x, rotation.y, rotation.z)
+
+    this.scene.add(this.camera)
   }
 
   _initCanvas() {
@@ -70,90 +162,6 @@ export default class Game {
   _initPlayer() {
     this.player = new Player()
     this.player.addTo(this.scene)
-  }
-
-  _initDebug() {
-    this.debug = gui
-
-    // Camera
-    const camera = this.debug.addFolder("Camera")
-    camera.add(this.camera.position, "x").name("PosX")
-    camera.add(this.camera.position, "y").name("PosY")
-    camera.add(this.camera.position, "z").name("Posz")
-    camera
-      .add(this.camera.rotation, "x")
-      .name("RotX")
-      .min(-Math.PI * 2)
-      .max(Math.PI * 2)
-      .step(0.001)
-    camera
-      .add(this.camera.rotation, "y")
-      .name("RotY")
-      .min(-Math.PI * 2)
-      .max(Math.PI * 2)
-      .step(0.001)
-    camera
-      .add(this.camera.rotation, "z")
-      .name("RotZ")
-      .min(-Math.PI * 2)
-      .max(Math.PI * 2)
-      .step(0.001)
-  }
-
-  // Public
-
-  /**
-   * Start game
-   */
-  start() {
-    // Init clock
-    const clock = new THREE.Clock()
-
-    const tick = function () {
-      const elapsedTime = clock.getElapsedTime()
-
-      if (this.currentLevel) this.currentLevel.watch()
-
-      this.player.move()
-
-      this.camera.lookAt(this.player.direction.position)
-
-      this.player.direction.lookAt(
-        this.camera.position.x,
-        this.player.direction.position.y,
-        this.camera.position.z
-      )
-      // Rerender the scene
-      this.renderer.render(this.scene, this.camera)
-
-      // Call tick again on the next frame
-      window.requestAnimationFrame(tick)
-    }.bind(this)
-
-    tick()
-  }
-
-  /**
-   * Load level
-   */
-  loadLevel(to, from) {
-    console.log("to : " + to + "  & from : " + from)
-    import("../levels/" + to).then(
-      function (module) {
-        const level = module.default
-        this.currentLevel = new level(this, from)
-      }.bind(this)
-    )
-  }
-
-  /**
-   * Add camera
-   */
-  moveCamera(position, rotation) {
-    this.camera.position.set(position.x, position.y, position.z)
-    this.camera.rotation.set(rotation.x, rotation.y, rotation.z)
-
-    this.scene.add(this.camera)
   }
 }
 
