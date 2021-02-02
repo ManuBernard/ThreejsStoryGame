@@ -1,5 +1,6 @@
+// Handles collision between 2 object based on cube bounding box
 export function detectCollisionCubes(object1, object2) {
-  object1.geometry.computeBoundingBox() //not needed if its already calculated
+  object1.geometry.computeBoundingBox()
   object2.geometry.computeBoundingBox()
   object1.updateMatrixWorld()
   object2.updateMatrixWorld()
