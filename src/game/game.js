@@ -1,6 +1,7 @@
 /** @module Game */
 
 import * as THREE from "three"
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 
 import Player from "./player.js"
 import Stage from "./stage.js"
@@ -18,8 +19,16 @@ export default class Game {
    * Create the game.
    */
   constructor() {
+    this.scene = null
+    this.canvas = null
+    this.renderer = null
     this.currentStage = null
     this.loadedStages = []
+    this.player = null
+    this.camera = null
+
+    // Game state
+    this.frozen = false
 
     this._initScene()
     this._initCanvas()
@@ -27,6 +36,12 @@ export default class Game {
     this._initCamera()
     this._initHandleSize()
     this._initPlayer()
+
+    const controls = new OrbitControls(this.camera, this.canvas)
+    controls.enableDamping = true
+
+    const axesHelper = new THREE.AxesHelper(20)
+    this.scene.add(axesHelper)
   }
 
   /**
@@ -34,7 +49,7 @@ export default class Game {
    */
   start() {
     const tick = function () {
-      if (this.currentStage) this.currentStage.watch()
+      if (this.currentStage && !this.frozen) this.currentStage.watch()
 
       this.player.move()
 
@@ -58,19 +73,24 @@ export default class Game {
 
   /**
    * Load the stage (the game is divided into many stages) each stages is a "mini scene".
-   * Loading a new stage will first clean the current stage (if there is one), meaning remonving all meshes and disposes materials and geometries.
+   * Loading a new stage will first clean the current stage (if there is one), meaning removing all meshes and disposes materials and geometries.
    * Then it will check if the new stage is already loaded, if not, it will load the webpack chunk and once it's done, load the stage.
    * Finally it will preload all the stages that are directly availables via the doors of the new loaded stage.
    * @param {string} to The name of the stage to load
    * @param {string} from The name of the stage coming from (used to locate the player to the correct spawn in the new stage)
    */
   loadStage(to, from) {
-    // Clean the current Stage (empty all mesh, dispose geometrics & materials)
+    if (this.frozen) {
+      return
+    }
+
+    this.frozen = true
+
     if (this.currentStage) {
       this.currentStage.clean()
     }
 
-    // Check if the stage to load is already loaded
+    // Check if the stage is already loaded
     if (this.loadedStages.hasOwnProperty("to")) {
       this._loadStage(this.loadedStages[to], from)
     } else {
@@ -107,9 +127,11 @@ export default class Game {
    * @private
    */
   _loadStage(stage, from) {
+    this.currentStage = new Stage(stage, this, from)
+
     window.requestAnimationFrame(
       function () {
-        this.currentStage = new Stage(stage, this, from)
+        this.frozen = false
         this._preloadStages()
       }.bind(this)
     )
@@ -121,7 +143,7 @@ export default class Game {
    */
   _preloadStages() {
     for (let key in this.currentStage.doors) {
-      if (this.currentStage.doors[key].position) {
+      if (this.currentStage.doors[key].size) {
         this._loadStageChunk(key)
       }
     }

@@ -27,14 +27,10 @@ ground.rotation.y = 2
 export const stage = { name: "house" }
 
 stage.doors = {
-  init: {
-    spawn: { x: 0, y: 1, z: 0 },
-  },
   map: {
     position: { x: -5.5, y: 1, z: 0 },
-    size: { x: 1, y: 2, z: 1 },
-    rotation: 0,
-    spawn: { x: -3, y: 1, z: 0 },
+    size: 3,
+    rotation: 2,
   },
 }
 

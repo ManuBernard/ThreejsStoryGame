@@ -3,13 +3,11 @@
 import * as THREE from "three"
 import Door from "./door"
 
-import { detectCollisionCubes } from "./helper/collisions"
-
 /** Class representing a stage, is responsible for the landscape, doodads, doors, npc...  */
 export default class stage {
   /**
    * Create a stage.
-   * @param {object} stageData The stage data
+   * @param {object} stageData The stage data { doors : {} , meshes  : [] , camera : {} }
    * @param {object} game The main game occurence
    * @param {string} from The name of the stage where the player is coming from
    */
@@ -18,22 +16,18 @@ export default class stage {
     this.from = from
 
     this.name = stageData.name
+
+    this.doors = {}
     this.meshes = stageData.meshes
-    this.doors = stageData.doors
     this.camera = stageData.camera
 
     this.init()
 
-    this.placePlayer()
     this.placeCamera()
-
     this.loadMeshes()
 
-    window.requestAnimationFrame(
-      function () {
-        this.loadDoors()
-      }.bind(this)
-    )
+    this.loadDoors(stageData.doors)
+    this.placePlayer()
   }
 
   /**
@@ -57,12 +51,12 @@ export default class stage {
   /**
    * Load all doors (doors are teleports to other stages)
    */
-  loadDoors() {
-    for (let key in this.doors) {
-      if (this.doors[key].position) {
-        const door = new Door(key, this.doors[key])
-        this.group.add(door.mesh)
-      }
+  loadDoors(doors) {
+    for (let key in doors) {
+      const door = new Door(key, doors[key])
+      this.doors[key] = door
+
+      if (door.mesh) this.group.add(door.mesh)
     }
   }
 
@@ -72,11 +66,14 @@ export default class stage {
   placePlayer() {
     const door = this.doors[this.from]
 
-    this.game.player.direction.position.set(
-      door.spawn.x,
-      door.spawn.y,
-      door.spawn.z
-    )
+    const rotation = door.rotation ? door.rotation : 0
+
+    const x = door.position.x + Math.sin(rotation) * 2
+    const z = door.position.z + Math.cos(rotation) * 2
+
+    this.game.player.direction.position.x = x
+    this.game.player.direction.position.y = door.position.y
+    this.game.player.direction.position.z = z
   }
 
   /**
@@ -99,46 +96,26 @@ export default class stage {
    * Watch, is called on every frame
    */
   watch() {
-    this._checkDoorCollision()
+    // Check contact between player and doors
+    for (let key in this.doors) {
+      const door = this.doors[key]
+      door.checkCollision(this.game)
+    }
   }
 
   /**
    * Clean the stage (remove objects + dispose materials and geometries)
    */
   clean() {
-    this.game.scene.traverse(function (obj) {
-      if (!obj.userData.preserve) {
-        if (obj.material) obj.material.dispose()
-        if (obj.geometry) obj.geometry.dispose()
-      }
-    })
-
-    this.game.scene.remove(this.group)
-  }
-
-  /**
-   *
-   *
-   *  Private
-   *
-   *
-   */
-
-  /**
-   * Check for contact with doors
-   * @private
-   */
-  _checkDoorCollision() {
     this.game.scene.traverse(
       function (obj) {
-        if (obj && obj.userData.doorTo) {
-          const col = detectCollisionCubes(obj, this.game.player.body)
-
-          if (col) {
-            this.game.loadStage(obj.userData.doorTo, this.name)
-          }
+        if (!obj.userData.preserve) {
+          if (obj.material) obj.material.dispose()
+          if (obj.geometry) obj.geometry.dispose()
         }
       }.bind(this)
     )
+
+    this.game.scene.remove(this.group)
   }
 }
