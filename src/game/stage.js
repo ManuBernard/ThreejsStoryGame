@@ -79,16 +79,7 @@ export default class stage {
    * Place the camera in the scene
    */
   placeCamera() {
-    game.camera.position.set(
-      this.camera.position.x,
-      this.camera.position.y,
-      this.camera.position.z
-    )
-    game.camera.rotation.set(
-      this.camera.rotation.x,
-      this.camera.rotation.y,
-      this.camera.rotation.z
-    )
+    game.camera.move(this.camera.position, this.camera.rotation)
   }
 
   /**

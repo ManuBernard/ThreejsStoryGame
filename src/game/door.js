@@ -44,7 +44,7 @@ export default class door {
   checkCollision() {
     if (this.mesh) {
       if (this.destinationName)
-        this.destinationName.lookAt(game.camera.position)
+        this.destinationName.lookAt(game.camera.get().position)
 
       const col = detectCollisionCubes(this.mesh, game.player.body)
       if (col) {

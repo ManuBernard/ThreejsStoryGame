@@ -1,19 +1,24 @@
 /** @module Game */
-import Stage from "./stage.js"
+import * as THREE from "three"
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
+
+import Stage from "./stage"
+import Player from "./player"
+import Camera from "./camera"
 
 import {
   initScene,
   initCanvas,
   initRenderer,
-  initCamera,
   initHandleSize,
-  initPlayer,
 } from "./helper/initgame"
 
 const sizes = {
   width: window.innerWidth,
   height: window.innerHeight,
 }
+
+const animationsOnTick = []
 
 class Game {
   constructor() {
@@ -22,39 +27,55 @@ class Game {
     this.scene = initScene()
     this.canvas = initCanvas()
     this.renderer = initRenderer(sizes, this.canvas)
-    this.camera = initCamera(sizes)
-    this.player = initPlayer()
 
     this.currentStage = null
     this.loadedStages = []
 
+    this.camera = null
+    this.player = null
+
     this.frozenControls = false
+  }
+
+  init() {
+    this.camera = new Camera(sizes)
+    this.player = new Player()
+
+    this.player.addTo(this.scene)
+
+    new OrbitControls(this.camera.get(), this.canvas)
+
+    // const axesHelper = new THREE.AxesHelper(1)
+    // this.scene.add(axesHelper)
 
     // Handle window resize
-    initHandleSize(sizes, this.camera, this.renderer)
+    initHandleSize(sizes, this.camera.get(), this.renderer)
   }
 
   /**
    * Start game
    */
   start() {
+    this.init()
     this.scene.add(this.player.direction)
 
     const tick = function () {
       if (this.currentStage && !this.frozenControls) this.currentStage.watch()
 
+      animationsOnTick.forEach((animation) => {
+        animation.animate()
+      })
+
       this.player.move()
 
-      this.camera.lookAt(this.player.direction.position)
-
       this.player.direction.lookAt(
-        this.camera.position.x,
+        this.camera.get().position.x,
         this.player.direction.position.y,
-        this.camera.position.z
+        this.camera.get().position.z
       )
 
       // Rerender the scene
-      this.renderer.render(this.scene, this.camera)
+      this.renderer.render(this.scene, this.camera.get())
 
       // Call tick again on the next frame
       window.requestAnimationFrame(tick)
@@ -94,11 +115,15 @@ class Game {
   }
 
   /**
-   * Move camera
+   * Add an animation to be executed on game tick
+   * @param {string} name The stage of the animation
+   * @param {function} animation The to be executed
    */
-  moveCamera(position, rotation) {
-    this.camera.position.set(position.x, position.y, position.z)
-    this.camera.rotation.set(rotation.x, rotation.y, rotation.z)
+  addOnTickAnimation(name, animate) {
+    animationsOnTick.push({
+      name,
+      animate,
+    })
   }
 
   /**
