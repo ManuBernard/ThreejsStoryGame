@@ -21,30 +21,28 @@ const ground = new THREE.Mesh(groundGeometry, groundMaterial)
 ground.name = "Ground"
 ground.rotation.x = Math.PI / 2
 
-// stage object
+// Stage object
 export const stage = { name: "map" }
 
 stage.doors = {
   init: {
-    spawn: { x: 0, y: 1, z: 0 },
+    position: { x: 0, y: 1, z: -2 },
   },
   fabrik: {
     position: { x: -5.5, y: 1, z: 0 },
-    size: { x: 1, y: 2, z: 1 },
-    rotation: 0,
-    spawn: { x: -3, y: 1, z: 0 },
+    size: 2,
+    rotation: Math.PI / 4,
   },
   house: {
     position: { x: 5.5, y: 1, z: 0 },
-    size: { x: 1, y: 2, z: 1 },
-    rotation: 0,
-    spawn: { x: 3, y: 1, z: 0 },
+    size: 3,
+    rotation: Math.PI * 1.5,
   },
 }
 
 // Camera
 stage.camera = {
-  position: { x: 5, y: 18, z: 12 },
+  position: { x: 5, y: 6, z: 12 },
   rotation: { x: -0.6, y: 0, z: 0 },
 }
 
