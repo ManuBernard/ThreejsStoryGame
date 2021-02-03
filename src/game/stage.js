@@ -70,9 +70,9 @@ export default class stage {
     const x = door.position.x + Math.sin(rotation) * 2
     const z = door.position.z + Math.cos(rotation) * 2
 
-    game.player.direction.position.x = x
-    game.player.direction.position.y = door.position.y
-    game.player.direction.position.z = z
+    game.player.get().position.x = x
+    game.player.get().position.y = door.position.y
+    game.player.get().position.z = z
   }
 
   /**

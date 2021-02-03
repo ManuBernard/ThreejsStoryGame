@@ -46,7 +46,7 @@ export default class door {
       if (this.destinationName)
         this.destinationName.lookAt(game.camera.get().position)
 
-      const col = detectCollisionCubes(this.mesh, game.player.body)
+      const col = detectCollisionCubes(this.mesh, game.player.getBody())
       if (col) {
         game.loadStage(this.destination, game.currentStage.name)
       }

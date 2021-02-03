@@ -25,7 +25,7 @@ export default class Camera {
     )
 
     // Animate camera on tick
-    game.addOnTickAnimation("cameraControl", this.onTick)
+    game.addOnTickAnimation("cameraControl", this.onTick.bind(this))
   }
 
   get() {
@@ -49,6 +49,6 @@ export default class Camera {
    * Animate camera on tick
    */
   onTick() {
-    camera.lookAt(game.player.direction.position)
+    camera.lookAt(game.player.get().position)
   }
 }
