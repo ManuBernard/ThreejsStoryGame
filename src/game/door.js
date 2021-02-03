@@ -1,6 +1,8 @@
 /** @module Door */
 
 import * as THREE from "three"
+import game from "./game"
+
 import { detectCollisionCubes } from "./helper/collisions"
 
 /** Class representing a door, the way to travel from a stage to another. */
@@ -37,9 +39,9 @@ export default class door {
 
   /**
    * Check for contact with players and load a new stage
-   * @param {object} game The game object, containing the player and the level to load
+
    */
-  checkCollision(game) {
+  checkCollision() {
     if (this.mesh) {
       if (this.destinationName)
         this.destinationName.lookAt(game.camera.position)

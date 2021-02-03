@@ -1,6 +1,7 @@
 /** @module Stage */
 
 import * as THREE from "three"
+import game from "./game"
 import Door from "./door"
 
 /** Class representing a stage, is responsible for the landscape, doodads, doors, npc...  */
@@ -11,8 +12,7 @@ export default class stage {
    * @param {object} game The main game occurence
    * @param {string} from The name of the stage where the player is coming from
    */
-  constructor(stageData, game, from) {
-    this.game = game
+  constructor(stageData, from) {
     this.from = from
 
     this.name = stageData.name
@@ -36,7 +36,7 @@ export default class stage {
   init() {
     this.group = new THREE.Group()
     this.group.name = "Stage " + this.name
-    this.game.scene.add(this.group)
+    game.scene.add(this.group)
   }
 
   /**
@@ -65,27 +65,26 @@ export default class stage {
    */
   placePlayer() {
     const door = this.doors[this.from]
-
     const rotation = door.rotation ? door.rotation : 0
 
     const x = door.position.x + Math.sin(rotation) * 2
     const z = door.position.z + Math.cos(rotation) * 2
 
-    this.game.player.direction.position.x = x
-    this.game.player.direction.position.y = door.position.y
-    this.game.player.direction.position.z = z
+    game.player.direction.position.x = x
+    game.player.direction.position.y = door.position.y
+    game.player.direction.position.z = z
   }
 
   /**
    * Place the camera in the scene
    */
   placeCamera() {
-    this.game.camera.position.set(
+    game.camera.position.set(
       this.camera.position.x,
       this.camera.position.y,
       this.camera.position.z
     )
-    this.game.camera.rotation.set(
+    game.camera.rotation.set(
       this.camera.rotation.x,
       this.camera.rotation.y,
       this.camera.rotation.z
@@ -99,7 +98,7 @@ export default class stage {
     // Check contact between player and doors
     for (let key in this.doors) {
       const door = this.doors[key]
-      door.checkCollision(this.game)
+      door.checkCollision(game)
     }
   }
 
@@ -107,7 +106,7 @@ export default class stage {
    * Clean the stage (remove objects + dispose materials and geometries)
    */
   clean() {
-    this.game.scene.traverse(
+    game.scene.traverse(
       function (obj) {
         if (!obj.userData.preserve) {
           if (obj.material) obj.material.dispose()
@@ -116,6 +115,6 @@ export default class stage {
       }.bind(this)
     )
 
-    this.game.scene.remove(this.group)
+    game.scene.remove(this.group)
   }
 }

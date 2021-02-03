@@ -1,55 +1,47 @@
 /** @module Game */
-
-import * as THREE from "three"
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
-
-import Player from "./player.js"
 import Stage from "./stage.js"
+
+import {
+  initScene,
+  initCanvas,
+  initRenderer,
+  initCamera,
+  initHandleSize,
+  initPlayer,
+} from "./helper/initgame"
 
 const sizes = {
   width: window.innerWidth,
   height: window.innerHeight,
 }
 
-/**
- * Class representing the game, contains the THREEJS scene, the renderer, the player the level...
- */
-export default class Game {
-  /**
-   * Create the game.
-   */
+class Game {
   constructor() {
-    this.scene = null
-    this.canvas = null
-    this.renderer = null
+    this._data = {}
+
+    this.scene = initScene()
+    this.canvas = initCanvas()
+    this.renderer = initRenderer(sizes, this.canvas)
+    this.camera = initCamera(sizes)
+    this.player = initPlayer()
+
     this.currentStage = null
     this.loadedStages = []
-    this.player = null
-    this.camera = null
 
-    // Game state
-    this.frozen = false
+    this.frozenControls = false
 
-    this._initScene()
-    this._initCanvas()
-    this._initRenderer()
-    this._initCamera()
-    this._initHandleSize()
-    this._initPlayer()
-
-    const controls = new OrbitControls(this.camera, this.canvas)
-    controls.enableDamping = true
-
-    const axesHelper = new THREE.AxesHelper(20)
-    this.scene.add(axesHelper)
+    // Handle window resize
+    initHandleSize(sizes, this.camera, this.renderer)
   }
 
   /**
    * Start game
    */
   start() {
+    this.scene.add(this.player.direction)
+
     const tick = function () {
-      if (this.currentStage && !this.frozen) this.currentStage.watch()
+      if (this.currentStage && !this.frozenControls) this.currentStage.watch()
 
       this.player.move()
 
@@ -72,19 +64,16 @@ export default class Game {
   }
 
   /**
-   * Load the stage (the game is divided into many stages) each stages is a "mini scene".
-   * Loading a new stage will first clean the current stage (if there is one), meaning removing all meshes and disposes materials and geometries.
-   * Then it will check if the new stage is already loaded, if not, it will load the webpack chunk and once it's done, load the stage.
-   * Finally it will preload all the stages that are directly availables via the doors of the new loaded stage.
+   * Load the stage
    * @param {string} to The name of the stage to load
    * @param {string} from The name of the stage coming from (used to locate the player to the correct spawn in the new stage)
    */
   loadStage(to, from) {
-    if (this.frozen) {
+    if (this.frozenControls) {
       return
     }
 
-    this.frozen = true
+    this.frozenControls = true
 
     if (this.currentStage) {
       this.currentStage.clean()
@@ -113,25 +102,17 @@ export default class Game {
   }
 
   /**
-   *
-   *
-   *  Private
-   *
-   *
-   */
-
-  /**
    * Load stage
    * @param {ObjectConstructor} stage The stage to load
    * @param {string} from The name of the current stage
    * @private
    */
   _loadStage(stage, from) {
-    this.currentStage = new Stage(stage, this, from)
+    this.currentStage = new Stage(stage, from)
 
     window.requestAnimationFrame(
       function () {
-        this.frozen = false
+        this.frozenControls = false
         this._preloadStages()
       }.bind(this)
     )
@@ -166,81 +147,8 @@ export default class Game {
       }.bind(this)
     )
   }
-
-  /**
-   * Initialize canvas
-   * @private
-   */
-  _initCanvas() {
-    this.canvas = document.querySelector("canvas.webgl")
-  }
-
-  /**
-   * Create renderer
-   * @private
-   */
-  _initRenderer() {
-    this.renderer = new THREE.WebGLRenderer({
-      canvas: this.canvas,
-      antialias: true,
-    })
-
-    this.renderer.setSize(sizes.width, sizes.height)
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-  }
-
-  /**
-   * Create scene
-   * @private
-   */
-  _initScene() {
-    this.scene = new THREE.Scene()
-  }
-
-  /**
-   * Initialize player and add to scene
-   * @private
-   */
-  _initPlayer() {
-    this.player = new Player()
-    this.player.addTo(this.scene)
-  }
-
-  /**
-   * Initialize camera
-   * @param {float} fov Field of view
-   * @param {float} near Near distance
-   * @param {float} far Far distance
-   * @private
-   */
-  _initCamera(fov = 50, near = 0.1, far = 1000) {
-    this.camera = new THREE.PerspectiveCamera(
-      fov,
-      sizes.width / sizes.height,
-      near,
-      far
-    )
-
-    this.scene.add(this.camera)
-  }
-
-  /**
-   * Handle screen resize
-   * @private
-   */
-  _initHandleSize() {
-    window.addEventListener("resize", () => {
-      // Update sizes
-      sizes.width = window.innerWidth
-      sizes.height = window.innerHeight
-
-      // Update camera
-      this.camera.aspect = sizes.width / sizes.height
-      this.camera.updateProjectionMatrix()
-
-      // Update renderer
-      this.renderer.setSize(sizes.width, sizes.height)
-      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    })
-  }
 }
+
+const game = new Game()
+
+export default game
