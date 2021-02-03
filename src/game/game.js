@@ -41,7 +41,7 @@ class Game {
     this.camera = new Camera(sizes)
     this.player = new Player()
 
-    this.player.addTo(this.scene)
+    this.scene.add(this.player.get())
 
     new OrbitControls(this.camera.get(), this.canvas)
 
@@ -57,7 +57,6 @@ class Game {
    */
   start() {
     this.init()
-    this.scene.add(this.player.direction)
 
     const tick = function () {
       if (this.currentStage && !this.frozenControls) this.currentStage.watch()
@@ -65,14 +64,6 @@ class Game {
       animationsOnTick.forEach((animation) => {
         animation.animate()
       })
-
-      this.player.move()
-
-      this.player.direction.lookAt(
-        this.camera.get().position.x,
-        this.player.direction.position.y,
-        this.camera.get().position.z
-      )
 
       // Rerender the scene
       this.renderer.render(this.scene, this.camera.get())
