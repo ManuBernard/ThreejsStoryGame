@@ -1,5 +1,5 @@
 import * as THREE from "three"
-import Player from "../player"
+
 /**
  * Initialize canvas
  * @private
@@ -30,25 +30,6 @@ export const initRenderer = (sizes, canvas) => {
  */
 export const initScene = () => {
   return new THREE.Scene()
-}
-
-/**
- * Initialize player and add to scene
- * @private
- */
-export const initPlayer = () => {
-  return new Player()
-}
-
-/**
- * Initialize camera
- * @param {float} fov Field of view
- * @param {float} near Near distance
- * @param {float} far Far distance
- * @private
- */
-export const initCamera = (sizes, fov = 50, near = 0.1, far = 1000) => {
-  return new THREE.PerspectiveCamera(fov, sizes.width / sizes.height, near, far)
 }
 
 /**
