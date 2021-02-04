@@ -74,7 +74,6 @@ class Game {
   /**
    * Load the stage
    * @param {string} to The name of the stage to load
-   * @param {string} from The name of the stage coming from (used to locate the player to the correct spawn in the new stage)
    */
   loadStage(to) {
     if (this.frozenControls) {
@@ -103,8 +102,8 @@ class Game {
 
   /**
    * Add an animation to be executed on game tick
-   * @param {string} name The stage of the animation
-   * @param {function} animation The to be executed
+   * @param {string} name The name of the animation
+   * @param {function} animation The animation to be executed
    */
   addOnTickAnimation(name, animate) {
     animationsOnTick.push({
@@ -114,9 +113,8 @@ class Game {
   }
 
   /**
-   * Add an animation to be executed on game tick
-   * @param {string} name The stage of the animation
-   * @param {function} animation The to be executed
+   * Remove an animation from the tick loop
+   * @param {string} name The name of the animation to remove
    */
   removeOnTickAnimation(name) {
     animationsOnTick.splice(

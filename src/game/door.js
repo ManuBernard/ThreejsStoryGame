@@ -21,7 +21,7 @@ export default class door {
     this.destination = destination
 
     if (this.options.size) {
-      const doorGeometry = new THREE.BoxBufferGeometry(this.options.size, 2, 1)
+      const doorGeometry = new THREE.BoxGeometry(this.options.size, 2, 1)
 
       const doorMaterial = new THREE.MeshBasicMaterial({
         wireframe: true,
@@ -68,7 +68,7 @@ export default class door {
 
   _showName() {
     fontLoader.load("/fonts/optimer_regular.typeface.json", (font) => {
-      const textGeometry = new THREE.TextBufferGeometry(this.destination, {
+      const textGeometry = new THREE.TextGeometry(this.destination, {
         font: font,
         size: 0.5,
         height: 0.1,

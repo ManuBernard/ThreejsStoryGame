@@ -88,7 +88,7 @@ export default class Player {
    */
   _initPlayer() {
     this._player = new THREE.Mesh(
-      new THREE.BoxBufferGeometry(0.3, 0.3, 0.3),
+      new THREE.BoxGeometry(0.3, 0.3, 0.3),
       new THREE.MeshStandardMaterial({ color: "red", wireframe: true })
     )
 
@@ -102,7 +102,7 @@ export default class Player {
    */
   _initBody() {
     this._body = new THREE.Mesh(
-      new THREE.BoxBufferGeometry(0.75, 1, 0.25),
+      new THREE.BoxGeometry(0.75, 1, 0.25),
       new THREE.MeshMatcapMaterial({ matcap: shirtTexture })
     )
 
@@ -110,7 +110,7 @@ export default class Player {
     this._body.userData.preserve = true
 
     const head = new THREE.Mesh(
-      new THREE.BoxBufferGeometry(0.5, 0.5, 0.5),
+      new THREE.BoxGeometry(0.5, 0.5, 0.5),
       new THREE.MeshMatcapMaterial({ matcap: skinTexture })
     )
 
@@ -120,7 +120,7 @@ export default class Player {
     head.position.z = 0.15
 
     const hair = new THREE.Mesh(
-      new THREE.BoxBufferGeometry(0.6, 0.6, 0.6),
+      new THREE.BoxGeometry(0.6, 0.6, 0.6),
       new THREE.MeshMatcapMaterial({ matcap: hairTexture })
     )
 
@@ -128,7 +128,7 @@ export default class Player {
     hair.userData.preserve = true
 
     const eyebrow = new THREE.Mesh(
-      new THREE.BoxBufferGeometry(0.3, 0.1, 0.1),
+      new THREE.BoxGeometry(0.3, 0.1, 0.1),
       new THREE.MeshStandardMaterial({ color: "black" })
     )
 
