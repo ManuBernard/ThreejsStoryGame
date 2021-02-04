@@ -78,7 +78,7 @@ class Game {
    * @param {string} to The name of the stage to load
    * @param {string} from The name of the stage coming from (used to locate the player to the correct spawn in the new stage)
    */
-  loadStage(to, from) {
+  loadStage(to) {
     if (this.frozenControls) {
       return
     }
@@ -91,13 +91,13 @@ class Game {
 
     // Check if the stage is already loaded
     if (this.loadedStages.hasOwnProperty("to")) {
-      this._loadStage(this.loadedStages[to], from)
+      this._loadStage(this.loadedStages[to])
     } else {
       // If not, load it
       this._loadStageChunk(
         to,
         function () {
-          this._loadStage(this.loadedStages[to], from)
+          this._loadStage(this.loadedStages[to])
         }.bind(this)
       )
     }
@@ -133,8 +133,9 @@ class Game {
    * @param {string} from The name of the current stage
    * @private
    */
-  _loadStage(stage, from) {
-    this.currentStage = new Stage(stage, from)
+  _loadStage(stage) {
+    const from = this.currentStage ? this.currentStage.name : "init"
+    this.currentStage = new Stage(from, stage)
 
     window.requestAnimationFrame(
       function () {
@@ -149,15 +150,15 @@ class Game {
    * @private
    */
   _preloadStages() {
-    for (let key in this.currentStage.doors) {
-      if (this.currentStage.doors[key].size) {
+    for (let key in this.currentStage.getDoors()) {
+      if (this.currentStage.getDoors()[key].size) {
         this._loadStageChunk(key)
       }
     }
   }
 
   /**
-   *  Load webpack chunk for a specific chunk
+   *  Load webpack chunk for a specific stage
    * @param {string} to The name of chunk to load (file name door key)
    * @param {function} callback Function to execute once loaded
    * @private

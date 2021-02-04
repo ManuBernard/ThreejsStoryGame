@@ -8,26 +8,25 @@ import Door from "./door"
 export default class stage {
   /**
    * Create a stage.
-   * @param {object} stageData The stage data { doors : {} , meshes  : [] , camera : {} }
-   * @param {object} game The main game occurence
    * @param {string} from The name of the stage where the player is coming from
+   * @param {object} options The options
    */
-  constructor(stageData, from) {
+  constructor(from, options) {
+    this.name = options.name
+
+    this._group = null
+    this._doors = {}
+
     this.from = from
-
-    this.name = stageData.name
-
-    this.doors = {}
-    this.meshes = stageData.meshes
-    this.camera = stageData.camera
+    this.options = { ...options }
 
     this.init()
 
-    this.placeCamera()
-    this.loadMeshes()
+    this.loadMeshes(options.meshes)
+    this.loadDoors(options.doors)
 
-    this.loadDoors(stageData.doors)
     this.placePlayer()
+    game.camera.move(options.camera.position, options.camera.rotation)
   }
 
   /**
@@ -43,11 +42,25 @@ export default class stage {
   }
 
   /**
+   * Return stage's doors
+   */
+  getDoors() {
+    return this._doors
+  }
+
+  /**
+   * Return stage's group
+   */
+  getGroup() {
+    return this._group
+  }
+
+  /**
    * Load all meshes needed to draw the stage
    */
-  loadMeshes() {
-    for (const mesh in this.meshes) {
-      this.group.add(this.meshes[mesh])
+  loadMeshes(meshes) {
+    for (const mesh in meshes) {
+      this.group.add(meshes[mesh])
     }
   }
 
@@ -57,7 +70,7 @@ export default class stage {
   loadDoors(doors) {
     for (let key in doors) {
       const door = new Door(key, doors[key])
-      this.doors[key] = door
+      this._doors[key] = door
       if (door.get()) this.group.add(door.get())
     }
   }
@@ -66,7 +79,7 @@ export default class stage {
    * Place the player in the scene
    */
   placePlayer() {
-    const door = this.doors[this.from]
+    const door = this._doors[this.from]
     const rotation = door.options.rotation ? door.options.rotation : 0
 
     const x = door.options.position.x + Math.sin(rotation) * 2
@@ -78,26 +91,20 @@ export default class stage {
   }
 
   /**
-   * Place the camera in the scene
-   */
-  placeCamera() {
-    game.camera.move(this.camera.position, this.camera.rotation)
-  }
-
-  /**
-   * onTick, is called on every frame
+   * Called on every frame, check doors collisions
    */
   onTick() {
-    if (!game.frozenControls)
+    if (!game.frozenControls) {
       // Check contact between player and doors
-      for (let key in this.doors) {
-        const door = this.doors[key]
+      for (let key in this._doors) {
+        const door = this._doors[key]
         door.checkCollision(game)
       }
+    }
   }
 
   /**
-   * Clean the stage (remove objects + dispose materials and geometries)
+   * Clean the stage (remove animations + remove objects + dispose materials and geometries)
    */
   clean() {
     game.removeOnTickAnimation("stageControl")

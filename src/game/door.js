@@ -59,7 +59,7 @@ export default class door {
 
       const col = detectCollisionCubes(this._door, game.player.getBody())
       if (col) {
-        game.loadStage(this.destination, game.currentStage.name)
+        game.loadStage(this.destination)
       }
     }
   }
