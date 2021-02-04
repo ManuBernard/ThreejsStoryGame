@@ -126,12 +126,11 @@ class Game {
   /**
    * Load stage
    * @param {ObjectConstructor} stage The stage to load
-   * @param {string} from The name of the current stage
    * @private
    */
-  _loadStage(stage) {
-    const from = this.currentStage ? this.currentStage.name : "init"
-    this.currentStage = new Stage(from, stage)
+  _loadStage(options) {
+    options.from = this.currentStage ? this.currentStage.options.name : "init"
+    this.currentStage = new Stage(options)
 
     window.requestAnimationFrame(
       function () {

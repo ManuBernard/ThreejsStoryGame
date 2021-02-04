@@ -7,13 +7,7 @@ import { detectCollisionCubes } from "./helper/collisions"
 
 const fontLoader = new THREE.FontLoader()
 
-/** Class representing a door, the way to travel from a stage to another. */
 export default class door {
-  /**
-   * Create a door.
-   * @param {string} destination The name of destination stage
-   * @param {object} data Set of data to create the door
-   */
   constructor(destination, options) {
     this._door = null
 
@@ -40,19 +34,21 @@ export default class door {
       this._door.rotation.y = this.options.rotation
 
       if (game.options.debug) {
-        this._showName()
+        this._showDestinationName()
         this._showSpawnMarker()
       }
     }
   }
 
+  /**
+   * Get door
+   */
   get() {
     return this._door
   }
 
   /**
-   * Check for contact with players and load a new stage
-
+   * Check for collision with player and load a new stage
    */
   checkCollision() {
     if (this._door) {
@@ -66,7 +62,10 @@ export default class door {
     }
   }
 
-  _showName() {
+  /**
+   * Show the destination name above the door (if debug)
+   */
+  _showDestinationName() {
     fontLoader.load("/fonts/optimer_regular.typeface.json", (font) => {
       const textGeometry = new THREE.TextGeometry(this.destination, {
         font: font,
@@ -88,6 +87,9 @@ export default class door {
     })
   }
 
+  /**
+   * SHow where the user will spawn and the axes (if debug)
+   */
   _showSpawnMarker() {
     const axesHelper = new THREE.AxesHelper(3)
     this._door.add(axesHelper)

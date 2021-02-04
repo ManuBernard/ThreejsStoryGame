@@ -34,6 +34,8 @@ export default class Camera {
 
   /**
    * Move camera
+   * @param {object} position {x,y,z}
+   * @param {object} rotation {x,y,z}
    */
   move(position, rotation) {
     this._camera.position.x = position.x

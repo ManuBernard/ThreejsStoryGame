@@ -4,20 +4,17 @@ import * as THREE from "three"
 import game from "./game"
 import Door from "./door"
 
-/** Class representing a stage, is responsible for the landscape, doodads, doors, npc...  */
+/** Stage class: responsible for the meshs, doors, positionning camera.  */
 export default class stage {
   /**
    * Create a stage.
    * @param {string} from The name of the stage where the player is coming from
    * @param {object} options The options
    */
-  constructor(from, options) {
-    this.name = options.name
-
+  constructor(options) {
     this._group = null
     this._doors = {}
 
-    this.from = from
     this.options = { ...options }
 
     this.init()
@@ -25,12 +22,13 @@ export default class stage {
     this.loadMeshes(options.meshes)
     this.loadDoors(options.doors)
 
-    this.placePlayer()
+    this.spawnPlayer(this._doors[this.options.from])
+
     game.camera.move(options.camera.position, options.camera.rotation)
   }
 
   /**
-   * Init the stage: creates a new group that will contains all the object used by the stage
+   * Init the stage: creates a new group that contains all the object used by the stage
    */
   init() {
     this.group = new THREE.Group()
@@ -76,17 +74,18 @@ export default class stage {
   }
 
   /**
-   * Place the player in the scene
+   * Spawn the player in the scene in front of the corect door
    */
-  placePlayer() {
-    const door = this._doors[this.from]
+  spawnPlayer(door) {
+    const doorPosition = door.options.position
     const rotation = door.options.rotation ? door.options.rotation : 0
 
-    const x = door.options.position.x + Math.sin(rotation) * 2
-    const z = door.options.position.z + Math.cos(rotation) * 2
+    const x = doorPosition.x + Math.sin(rotation) * 2
+    const y = doorPosition.y + 0
+    const z = doorPosition.z + Math.cos(rotation) * 2
 
     game.player.get().position.x = x
-    game.player.get().position.y = door.options.position.y
+    game.player.get().position.y = y
     game.player.get().position.z = z
   }
 
@@ -95,7 +94,7 @@ export default class stage {
    */
   onTick() {
     if (!game.frozenControls) {
-      // Check contact between player and doors
+      // Check collision between player and doors
       for (let key in this._doors) {
         const door = this._doors[key]
         door.checkCollision(game)

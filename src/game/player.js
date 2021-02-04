@@ -32,10 +32,16 @@ export default class Player {
     game.addOnTickAnimation("move", this.onTick.bind(this))
   }
 
+  /**
+   * Get player
+   */
   get() {
     return this._player
   }
 
+  /**
+   * Get player body
+   */
   getBody() {
     return this._body
   }
@@ -85,6 +91,7 @@ export default class Player {
 
   /**
    * Initialize player
+   * @Private
    */
   _initPlayer() {
     this._player = new THREE.Mesh(
