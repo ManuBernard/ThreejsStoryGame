@@ -2,53 +2,54 @@ import * as THREE from "three"
 import game from "./game"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 
-let camera
-
 export default class Camera {
-  constructor(sizes) {
-    this.init(sizes)
-  }
+  constructor(options) {
+    this._camera = null
 
-  /**
-   * Initialize camera
-   * @param {float} fov Field of view
-   * @param {float} near Near distance
-   * @param {float} far Far distance
-   * @private
-   */
-  init(sizes, fov = 50, near = 0.1, far = 1000) {
-    camera = new THREE.PerspectiveCamera(
-      fov,
-      sizes.width / sizes.height,
-      near,
-      far
+    this.options = {
+      width: 800,
+      height: 600,
+      fov: 50,
+      near: 0.1,
+      far: 1000,
+      ...options,
+    }
+
+    this._camera = new THREE.PerspectiveCamera(
+      this.options.fov,
+      this.options.width / this.options.height,
+      this.options.near,
+      this.options.far
     )
 
     // Animate camera on tick
     game.addOnTickAnimation("cameraControl", this.onTick.bind(this))
   }
 
+  /**
+   * Get camera
+   */
   get() {
-    return camera
+    return this._camera
   }
 
   /**
    * Move camera
    */
   move(position, rotation) {
-    camera.position.x = position.x
-    camera.position.y = position.y
-    camera.position.z = position.z
+    this._camera.position.x = position.x
+    this._camera.position.y = position.y
+    this._camera.position.z = position.z
 
-    camera.rotation.x = rotation.x
-    camera.rotation.y = rotation.y
-    camera.rotation.z = rotation.z
+    this._camera.rotation.x = rotation.x
+    this._camera.rotation.y = rotation.y
+    this._camera.rotation.z = rotation.z
   }
 
   /**
    * Animate camera on tick
    */
   onTick() {
-    camera.lookAt(game.player.get().position)
+    this._camera.lookAt(game.player.get().position)
   }
 }
