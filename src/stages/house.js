@@ -14,7 +14,7 @@ const groundMaterial = new THREE.MeshMatcapMaterial({
 })
 
 // Geometries
-const groundGeometry = new THREE.BoxBufferGeometry(20, 20, 20)
+const groundGeometry = new THREE.BoxGeometry(20, 20, 20)
 
 // Meshes
 const ground = new THREE.Mesh(groundGeometry, groundMaterial)

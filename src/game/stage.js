@@ -4,47 +4,61 @@ import * as THREE from "three"
 import game from "./game"
 import Door from "./door"
 
-/** Class representing a stage, is responsible for the landscape, doodads, doors, npc...  */
+/** Stage class: responsible for the meshs, doors, positionning camera.  */
 export default class stage {
   /**
    * Create a stage.
-   * @param {object} stageData The stage data { doors : {} , meshes  : [] , camera : {} }
-   * @param {object} game The main game occurence
    * @param {string} from The name of the stage where the player is coming from
+   * @param {object} options The options
    */
-  constructor(stageData, from) {
-    this.from = from
+  constructor(options) {
+    this._group = null
+    this._doors = {}
 
-    this.name = stageData.name
-
-    this.doors = {}
-    this.meshes = stageData.meshes
-    this.camera = stageData.camera
+    this.options = { ...options }
 
     this.init()
 
-    this.placeCamera()
-    this.loadMeshes()
+    this.loadMeshes(options.meshes)
+    this.loadDoors(options.doors)
 
-    this.loadDoors(stageData.doors)
-    this.placePlayer()
+    this.spawnPlayer(this._doors[this.options.from])
+
+    game.camera.move(options.camera.position, options.camera.rotation)
   }
 
   /**
-   * Init the stage: creates a new group that will contains all the object used by the stage
+   * Init the stage: creates a new group that contains all the object used by the stage
    */
   init() {
     this.group = new THREE.Group()
     this.group.name = "Stage " + this.name
     game.scene.add(this.group)
+
+    // Animate camera on tick
+    game.addOnTickAnimation("stageControl", this.onTick.bind(this))
+  }
+
+  /**
+   * Return stage's doors
+   */
+  getDoors() {
+    return this._doors
+  }
+
+  /**
+   * Return stage's group
+   */
+  getGroup() {
+    return this._group
   }
 
   /**
    * Load all meshes needed to draw the stage
    */
-  loadMeshes() {
-    for (const mesh in this.meshes) {
-      this.group.add(this.meshes[mesh])
+  loadMeshes(meshes) {
+    for (const mesh in meshes) {
+      this.group.add(meshes[mesh])
     }
   }
 
@@ -54,49 +68,46 @@ export default class stage {
   loadDoors(doors) {
     for (let key in doors) {
       const door = new Door(key, doors[key])
-      this.doors[key] = door
-
-      if (door.mesh) this.group.add(door.mesh)
+      this._doors[key] = door
+      if (door.get()) this.group.add(door.get())
     }
   }
 
   /**
-   * Place the player in the scene
+   * Spawn the player in the scene in front of the corect door
    */
-  placePlayer() {
-    const door = this.doors[this.from]
-    const rotation = door.rotation ? door.rotation : 0
+  spawnPlayer(door) {
+    const doorPosition = door.options.position
+    const rotation = door.options.rotation ? door.options.rotation : 0
 
-    const x = door.position.x + Math.sin(rotation) * 2
-    const z = door.position.z + Math.cos(rotation) * 2
+    const x = doorPosition.x + Math.sin(rotation) * 2
+    const y = doorPosition.y + 0
+    const z = doorPosition.z + Math.cos(rotation) * 2
 
     game.player.get().position.x = x
-    game.player.get().position.y = door.position.y
+    game.player.get().position.y = y
     game.player.get().position.z = z
   }
 
   /**
-   * Place the camera in the scene
+   * Called on every frame, check doors collisions
    */
-  placeCamera() {
-    game.camera.move(this.camera.position, this.camera.rotation)
-  }
-
-  /**
-   * Watch, is called on every frame
-   */
-  watch() {
-    // Check contact between player and doors
-    for (let key in this.doors) {
-      const door = this.doors[key]
-      door.checkCollision(game)
+  onTick() {
+    if (!game.frozenControls) {
+      // Check collision between player and doors
+      for (let key in this._doors) {
+        const door = this._doors[key]
+        door.checkCollision(game)
+      }
     }
   }
 
   /**
-   * Clean the stage (remove objects + dispose materials and geometries)
+   * Clean the stage (remove animations + remove objects + dispose materials and geometries)
    */
   clean() {
+    game.removeOnTickAnimation("stageControl")
+
     game.scene.traverse(
       function (obj) {
         if (!obj.userData.preserve) {
