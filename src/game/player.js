@@ -4,6 +4,8 @@ import * as THREE from "three"
 import game from "./game"
 import Controller from "./controller"
 
+import * as physics from "./helper/physics"
+
 const textureLoader = new THREE.TextureLoader()
 
 import skinTextureSource from "../textures/1.png"
@@ -18,6 +20,7 @@ export default class Player {
   constructor(options) {
     this._player = null
     this._body = null
+    this._physic = null
 
     this.options = { speed: 0.1, ...options }
 
@@ -50,6 +53,18 @@ export default class Player {
    * Move the player in the stage
    */
   onTick() {
+    this._physicMesh.position.copy(this._physic.position)
+    this._physicMesh.quaternion.copy(this._physic.quaternion)
+
+    this._physic.position.x = this._player.position.x
+    this._physic.position.z = this._player.position.z
+    this._player.position.y = this._physic.position.y
+    // this._physic.quaternion.copy(this._player.quaternion)
+
+    console.log(this._physic.position)
+    // this._physic.position =
+    // object.mesh.position.copy(object.body.position)
+    // object.mesh.quaternion.copy(object.body.quaternion)
     this._player.lookAt(
       game.camera.get().position.x,
       this._player.position.y,
@@ -155,5 +170,18 @@ export default class Player {
 
     this._body.geometry.computeBoundingBox()
     this._body.userData.preserve = true
+
+    const box = physics.createBox(
+      { x: 1, y: 1, z: 1 },
+      { x: 0, y: 1.3, z: 0 },
+      { x: 0, y: 0, z: 0 },
+      new THREE.MeshMatcapMaterial({ matcap: skinTexture }),
+      1
+    )
+
+    this._physic = box.body
+    this._physicMesh = box.mesh
+    game.world.addBody(box.body)
+    game.scene.add(box.mesh)
   }
 }

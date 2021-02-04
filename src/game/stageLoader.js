@@ -45,7 +45,8 @@ class StageLoader {
    */
   _loadStage(options) {
     options.from = game.stage ? game.stage.options.name : "init"
-    game.stage = new Stage(options)
+
+    options()
 
     window.requestAnimationFrame(
       function () {
@@ -76,7 +77,7 @@ class StageLoader {
   _loadStageChunk(to, callback = null) {
     import(/* webpackChunkName:  "[request]" */ `../stages/${to}`).then(
       function (module) {
-        this.loadedStages[to] = module.stage
+        this.loadedStages[to] = module.default
 
         if (callback) {
           callback()

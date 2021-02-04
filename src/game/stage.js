@@ -12,28 +12,21 @@ export default class stage {
    * @param {object} options The options
    */
   constructor(options) {
-    this._group = null
+    this._from = "init"
+    this._group = new THREE.Group()
+    this._group.name = "Stage " + this.name
     this._doors = {}
+    this._meshes = []
+    this._physicObjects = []
 
-    this.options = { ...options }
-
-    this.init()
-
-    this.loadMeshes(options.meshes)
-    this.loadDoors(options.doors)
-
-    this.spawnPlayer(this._doors[this.options.from])
-
-    game.camera.move(options.camera.position, options.camera.rotation)
+    game.scene.add(this._group)
   }
 
   /**
-   * Init the stage: creates a new group that contains all the object used by the stage
+   * Start the stage
    */
-  init() {
-    this.group = new THREE.Group()
-    this.group.name = "Stage " + this.name
-    game.scene.add(this.group)
+  start() {
+    this.spawnPlayer(this._doors[this._from])
 
     // Animate camera on tick
     game.addOnTickAnimation("stageControl", this.onTick.bind(this))
@@ -57,8 +50,20 @@ export default class stage {
    * Load all meshes needed to draw the stage
    */
   loadMeshes(meshes) {
+    this.objects = meshes
     for (const mesh in meshes) {
-      this.group.add(meshes[mesh])
+      this._group.add(meshes[mesh])
+    }
+  }
+
+  /**
+   * Load all meshes needed to draw the stage
+   */
+  loadPhysicsObjects(objects) {
+    this._physicObjects = objects
+    for (const key in objects) {
+      this._group.add(objects[key].mesh)
+      game.world.addBody(objects[key].body)
     }
   }
 
@@ -69,7 +74,7 @@ export default class stage {
     for (let key in doors) {
       const door = new Door(key, doors[key])
       this._doors[key] = door
-      if (door.get()) this.group.add(door.get())
+      if (door.get()) this._group.add(door.get())
     }
   }
 
@@ -99,6 +104,10 @@ export default class stage {
         const door = this._doors[key]
         door.checkCollision(game)
       }
+      for (const object of this._physicObjects) {
+        object.mesh.position.copy(object.body.position)
+        object.mesh.quaternion.copy(object.body.quaternion)
+      }
     }
   }
 
@@ -117,6 +126,6 @@ export default class stage {
       }.bind(this)
     )
 
-    game.scene.remove(this.group)
+    game.scene.remove(this._group)
   }
 }

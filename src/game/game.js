@@ -1,6 +1,8 @@
 /** @module Game */
 import * as THREE from "three"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
+import * as CANNON from "cannon-es"
+import * as physics from "./helper/physics"
 
 import Stage from "./stage"
 import Player from "./player"
@@ -38,6 +40,26 @@ class Game {
 
     // Possibility to freeze the game for a while (for exemple during stage )
     this.frozenControls = false
+
+    this.initWorld()
+  }
+
+  initWorld() {
+    this.world = new CANNON.World()
+    this.world.broadphase = new CANNON.SAPBroadphase(this.world)
+    // this.world.allowSleep = true
+    this.world.gravity.set(0, -9.02, 0)
+
+    const defaultContactMaterial = new CANNON.ContactMaterial(
+      physics.defaultMaterial,
+      physics.defaultMaterial,
+      {
+        friction: 1,
+        restitution: 0.7,
+      }
+    )
+
+    this.world.defaultContactMaterial = defaultContactMaterial
   }
 
   /**
@@ -54,7 +76,16 @@ class Game {
     // Handle window resize
     initHandleSize(sizes, this.camera.get(), this.renderer)
 
+    const clock = new THREE.Clock()
+    let oldElapsedTime = 0
+
     const tick = function () {
+      const elapsedTime = clock.getElapsedTime()
+      const deltaTime = elapsedTime - oldElapsedTime
+      oldElapsedTime = elapsedTime
+
+      this.world.step(1 / 60, deltaTime, 3)
+
       animationsOnTick.forEach((animation) => {
         animation.animate()
       })
