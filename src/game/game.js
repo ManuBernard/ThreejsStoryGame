@@ -22,8 +22,6 @@ const animationsOnTick = []
 
 class Game {
   constructor() {
-    this._data = {}
-
     this.scene = initScene()
     this.canvas = initCanvas()
     this.renderer = initRenderer(sizes, this.canvas)
@@ -37,26 +35,19 @@ class Game {
     this.frozenControls = false
   }
 
-  init() {
+  /**
+   * Start game
+   */
+  start(options) {
+    this.options = { ...options }
+
     this.camera = new Camera(sizes)
     this.player = new Player()
 
     this.scene.add(this.player.get())
 
-    new OrbitControls(this.camera.get(), this.canvas)
-
-    // const axesHelper = new THREE.AxesHelper(1)
-    // this.scene.add(axesHelper)
-
     // Handle window resize
     initHandleSize(sizes, this.camera.get(), this.renderer)
-  }
-
-  /**
-   * Start game
-   */
-  start() {
-    this.init()
 
     const tick = function () {
       animationsOnTick.forEach((animation) => {
@@ -71,6 +62,13 @@ class Game {
     }.bind(this)
 
     tick()
+
+    if (this.options.debug) {
+      new OrbitControls(this.camera.get(), this.canvas)
+
+      const axesHelper = new THREE.AxesHelper(1)
+      this.scene.add(axesHelper)
+    }
   }
 
   /**

@@ -39,8 +39,10 @@ export default class door {
 
       this._door.rotation.y = this.options.rotation
 
-      this._showName()
-      this._showSpawnMarker()
+      if (game.options.debug) {
+        this._showName()
+        this._showSpawnMarker()
+      }
     }
   }
 

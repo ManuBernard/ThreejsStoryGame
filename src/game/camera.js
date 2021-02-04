@@ -1,6 +1,5 @@
 import * as THREE from "three"
 import game from "./game"
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 
 export default class Camera {
   constructor(options) {
