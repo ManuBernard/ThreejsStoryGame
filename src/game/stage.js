@@ -37,6 +37,9 @@ export default class stage {
     this.group = new THREE.Group()
     this.group.name = "Stage " + this.name
     game.scene.add(this.group)
+
+    // Animate camera on tick
+    game.addOnTickAnimation("stageControl", this.onTick.bind(this))
   }
 
   /**
@@ -55,8 +58,7 @@ export default class stage {
     for (let key in doors) {
       const door = new Door(key, doors[key])
       this.doors[key] = door
-
-      if (door.mesh) this.group.add(door.mesh)
+      if (door.get()) this.group.add(door.get())
     }
   }
 
@@ -65,13 +67,13 @@ export default class stage {
    */
   placePlayer() {
     const door = this.doors[this.from]
-    const rotation = door.rotation ? door.rotation : 0
+    const rotation = door.options.rotation ? door.options.rotation : 0
 
-    const x = door.position.x + Math.sin(rotation) * 2
-    const z = door.position.z + Math.cos(rotation) * 2
+    const x = door.options.position.x + Math.sin(rotation) * 2
+    const z = door.options.position.z + Math.cos(rotation) * 2
 
     game.player.get().position.x = x
-    game.player.get().position.y = door.position.y
+    game.player.get().position.y = door.options.position.y
     game.player.get().position.z = z
   }
 
@@ -83,20 +85,23 @@ export default class stage {
   }
 
   /**
-   * Watch, is called on every frame
+   * onTick, is called on every frame
    */
-  watch() {
-    // Check contact between player and doors
-    for (let key in this.doors) {
-      const door = this.doors[key]
-      door.checkCollision(game)
-    }
+  onTick() {
+    if (!game.frozenControls)
+      // Check contact between player and doors
+      for (let key in this.doors) {
+        const door = this.doors[key]
+        door.checkCollision(game)
+      }
   }
 
   /**
    * Clean the stage (remove objects + dispose materials and geometries)
    */
   clean() {
+    game.removeOnTickAnimation("stageControl")
+
     game.scene.traverse(
       function (obj) {
         if (!obj.userData.preserve) {

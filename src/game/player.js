@@ -23,8 +23,8 @@ export default class Player {
   /**
    * Create the player.
    */
-  constructor(option) {
-    this.option = { speed: 0.1, ...option }
+  constructor(options) {
+    this.options = { speed: 0.1, ...options }
 
     initPlayer()
     initBody()
@@ -60,12 +60,12 @@ export default class Player {
     const mx = this.controller.movingX[0]
 
     if (mz) {
-      const vector = mz == "up" ? -this.option.speed : this.option.speed
+      const vector = mz == "up" ? -this.options.speed : this.options.speed
       player.translateZ(vector)
     }
 
     if (mx) {
-      const vector = mx == "left" ? -this.option.speed : this.option.speed
+      const vector = mx == "left" ? -this.options.speed : this.options.speed
       player.translateX(vector)
     }
 

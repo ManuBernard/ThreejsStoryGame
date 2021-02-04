@@ -59,8 +59,6 @@ class Game {
     this.init()
 
     const tick = function () {
-      if (this.currentStage && !this.frozenControls) this.currentStage.watch()
-
       animationsOnTick.forEach((animation) => {
         animation.animate()
       })
@@ -115,6 +113,18 @@ class Game {
       name,
       animate,
     })
+  }
+
+  /**
+   * Add an animation to be executed on game tick
+   * @param {string} name The stage of the animation
+   * @param {function} animation The to be executed
+   */
+  removeOnTickAnimation(name) {
+    animationsOnTick.splice(
+      animationsOnTick.findIndex((animation) => animation.name === name),
+      1
+    )
   }
 
   /**
