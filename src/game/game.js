@@ -6,6 +6,8 @@ import Stage from "./stage"
 import Player from "./player"
 import Camera from "./camera"
 
+import stageLoader from "./stageLoader"
+
 import {
   initScene,
   initCanvas,
@@ -22,16 +24,19 @@ const animationsOnTick = []
 
 class Game {
   constructor() {
+    // Threejs scene, canvas & renderer
     this.scene = initScene()
     this.canvas = initCanvas()
     this.renderer = initRenderer(sizes, this.canvas)
 
-    this.currentStage = null
-    this.loadedStages = []
+    // The game current stage
+    this.stage = null
 
+    // The camera & the player
     this.camera = null
     this.player = null
 
+    // Possibility to freeze the game for a while (for exemple during stage )
     this.frozenControls = false
   }
 
@@ -76,28 +81,7 @@ class Game {
    * @param {string} to The name of the stage to load
    */
   loadStage(to) {
-    if (this.frozenControls) {
-      return
-    }
-
-    this.frozenControls = true
-
-    if (this.currentStage) {
-      this.currentStage.clean()
-    }
-
-    // Check if the stage is already loaded
-    if (this.loadedStages.hasOwnProperty("to")) {
-      this._loadStage(this.loadedStages[to])
-    } else {
-      // If not, load it
-      this._loadStageChunk(
-        to,
-        function () {
-          this._loadStage(this.loadedStages[to])
-        }.bind(this)
-      )
-    }
+    stageLoader.load(to)
   }
 
   /**
@@ -120,53 +104,6 @@ class Game {
     animationsOnTick.splice(
       animationsOnTick.findIndex((animation) => animation.name === name),
       1
-    )
-  }
-
-  /**
-   * Load stage
-   * @param {ObjectConstructor} stage The stage to load
-   * @private
-   */
-  _loadStage(options) {
-    options.from = this.currentStage ? this.currentStage.options.name : "init"
-    this.currentStage = new Stage(options)
-
-    window.requestAnimationFrame(
-      function () {
-        this.frozenControls = false
-        this._preloadStages()
-      }.bind(this)
-    )
-  }
-
-  /**
-   * Preload all stages that can be accessed from this one (based on doors in the stage)
-   * @private
-   */
-  _preloadStages() {
-    for (let key in this.currentStage.getDoors()) {
-      if (this.currentStage.getDoors()[key].size) {
-        this._loadStageChunk(key)
-      }
-    }
-  }
-
-  /**
-   *  Load webpack chunk for a specific stage
-   * @param {string} to The name of chunk to load (file name door key)
-   * @param {function} callback Function to execute once loaded
-   * @private
-   */
-  _loadStageChunk(to, callback = null) {
-    import(/* webpackChunkName:  "[request]" */ `../stages/${to}`).then(
-      function (module) {
-        this.loadedStages[to] = module.stage
-
-        if (callback) {
-          callback()
-        }
-      }.bind(this)
     )
   }
 }
