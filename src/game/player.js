@@ -2,34 +2,29 @@
 
 import * as THREE from "three"
 import game from "./game"
+import Controller from "./controller"
+
+const textureLoader = new THREE.TextureLoader()
 
 import skinTextureSource from "../textures/1.png"
 import hairTextureSource from "../textures/3.png"
 import shirtTextureSource from "../textures/2.png"
 
-const textureLoader = new THREE.TextureLoader()
-
-import Controller from "./controller"
-
 const skinTexture = textureLoader.load(skinTextureSource)
 const hairTexture = textureLoader.load(hairTextureSource)
 const shirtTexture = textureLoader.load(shirtTextureSource)
 
-let player
-let body
-
-/** Class representing the player. */
 export default class Player {
-  /**
-   * Create the player.
-   */
   constructor(options) {
+    this._player = null
+    this._body = null
+
     this.options = { speed: 0.1, ...options }
 
-    initPlayer()
-    initBody()
+    this._initPlayer()
+    this._initBody()
 
-    player.add(body)
+    this._player.add(this._body)
 
     this.controller = new Controller()
 
@@ -38,21 +33,20 @@ export default class Player {
   }
 
   get() {
-    return player
+    return this._player
   }
 
   getBody() {
-    return body
+    return this._body
   }
 
   /**
    * Move the player in the stage
-   * This is call on every animation frame
    */
   onTick() {
-    player.lookAt(
+    this._player.lookAt(
       game.camera.get().position.x,
-      player.position.y,
+      this._player.position.y,
       game.camera.get().position.z
     )
 
@@ -61,97 +55,98 @@ export default class Player {
 
     if (mz) {
       const vector = mz == "up" ? -this.options.speed : this.options.speed
-      player.translateZ(vector)
+      this._player.translateZ(vector)
     }
 
     if (mx) {
       const vector = mx == "left" ? -this.options.speed : this.options.speed
-      player.translateX(vector)
+      this._player.translateX(vector)
     }
 
     // Body Rotation
     if (mz == "down" && !mx) {
-      body.rotation.y = 0
+      this._body.rotation.y = 0
     } else if (mz == "down" && mx == "right") {
-      body.rotation.y = Math.PI * 0.25
+      this._body.rotation.y = Math.PI * 0.25
     } else if (mx == "right" && !mz) {
-      body.rotation.y = Math.PI * 0.5
+      this._body.rotation.y = Math.PI * 0.5
     } else if (mz == "up" && mx == "left") {
-      body.rotation.y = Math.PI * 1.25
+      this._body.rotation.y = Math.PI * 1.25
     } else if (mz == "up" && !mx) {
-      body.rotation.y = Math.PI
+      this._body.rotation.y = Math.PI
     } else if (mz == "up" && mx == "right") {
-      body.rotation.y = Math.PI * 0.75
+      this._body.rotation.y = Math.PI * 0.75
     } else if (mx == "left" && !mz) {
-      body.rotation.y = Math.PI * 1.5
+      this._body.rotation.y = Math.PI * 1.5
     } else if (mz == "down" && mx == "left") {
-      body.rotation.y = Math.PI * 1.75
+      this._body.rotation.y = Math.PI * 1.75
     }
   }
-}
 
-/**
- * Initialize player
- */
-const initPlayer = () => {
-  player = new THREE.Mesh(
-    new THREE.BoxBufferGeometry(0.3, 0.3, 0.3),
-    new THREE.MeshStandardMaterial({ color: "red", wireframe: true })
-  )
+  /**
+   * Initialize player
+   */
+  _initPlayer() {
+    this._player = new THREE.Mesh(
+      new THREE.BoxBufferGeometry(0.3, 0.3, 0.3),
+      new THREE.MeshStandardMaterial({ color: "red", wireframe: true })
+    )
 
-  player.name = "Player"
-  player.userData.preserve = true
-}
+    this._player.name = "Player"
+    this._player.userData.preserve = true
+  }
 
-/**
- * Initialize player body
- * @Private
- */
-const initBody = () => {
-  body = new THREE.Mesh(
-    new THREE.BoxBufferGeometry(0.75, 1, 0.25),
-    new THREE.MeshMatcapMaterial({ matcap: shirtTexture })
-  )
+  /**
+   * Initialize player body
+   * @Private
+   */
+  _initBody() {
+    this._body = new THREE.Mesh(
+      new THREE.BoxBufferGeometry(0.75, 1, 0.25),
+      new THREE.MeshMatcapMaterial({ matcap: shirtTexture })
+    )
 
-  body.name = "Body"
-  body.userData.preserve = true
+    this._body.name = "Body"
+    this._body.userData.preserve = true
 
-  const head = new THREE.Mesh(
-    new THREE.BoxBufferGeometry(0.5, 0.5, 0.5),
-    new THREE.MeshMatcapMaterial({ matcap: skinTexture })
-  )
+    const head = new THREE.Mesh(
+      new THREE.BoxBufferGeometry(0.5, 0.5, 0.5),
+      new THREE.MeshMatcapMaterial({ matcap: skinTexture })
+    )
 
-  head.name = "Head"
-  head.userData.preserve = true
+    head.name = "Head"
+    head.userData.preserve = true
 
-  head.position.z = 0.15
+    head.position.z = 0.15
 
-  const hair = new THREE.Mesh(
-    new THREE.BoxBufferGeometry(0.6, 0.6, 0.6),
-    new THREE.MeshMatcapMaterial({ matcap: hairTexture })
-  )
+    const hair = new THREE.Mesh(
+      new THREE.BoxBufferGeometry(0.6, 0.6, 0.6),
+      new THREE.MeshMatcapMaterial({ matcap: hairTexture })
+    )
 
-  hair.name = "Hair"
-  hair.userData.preserve = true
+    hair.name = "Hair"
+    hair.userData.preserve = true
 
-  const eyebrow = new THREE.Mesh(
-    new THREE.BoxBufferGeometry(0.3, 0.1, 0.1),
-    new THREE.MeshStandardMaterial({ color: "black" })
-  )
+    const eyebrow = new THREE.Mesh(
+      new THREE.BoxBufferGeometry(0.3, 0.1, 0.1),
+      new THREE.MeshStandardMaterial({ color: "black" })
+    )
 
-  eyebrow.name = "Eyebrow"
-  eyebrow.userData.preserve = true
+    eyebrow.name = "Eyebrow"
+    eyebrow.userData.preserve = true
 
-  head.add(hair)
-  head.add(eyebrow)
-  hair.position.z = -0.1
-  hair.position.y = 0.1
+    head.add(hair)
+    head.add(eyebrow)
+    hair.position.z = -0.1
+    hair.position.y = 0.1
 
-  eyebrow.position.z = 0.26
+    eyebrow.position.z = 0.26
 
-  head.position.y = 0.75
-  body.add(head)
+    head.position.y = 0.75
 
-  body.geometry.computeBoundingBox()
-  body.userData.preserve = true
+    this._body.add(head)
+
+    this._body.geometry.computeBoundingBox()
+    this._body.userData.preserve = true
+  }
 }
